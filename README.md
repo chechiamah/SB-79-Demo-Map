@@ -19,6 +19,6 @@ Walkability: [Los Angeles City Planning](https://www.arcgis.com/home/item.html?i
 Tools used: Leaflet (see citation in code)  
 	search ⇒ Source: [https://github.com/stefanocudini/leaflet-search/blob/master/examples/simple.html](https://github.com/stefanocudini/leaflet-search/blob/master/examples/simple.html)  
 	
-Layers → ArcGIS REST Services Directory, OpenStreetMap 
+Layers → ArcGIS REST Services Directory, OpenStreetMap, Visual Studio Code, Github Copilot
 	
 Layer Control → [https://leafletjs.com/examples/choropleth/\#:\~:text=Custom%20Legend%20Control](https://leafletjs.com/examples/choropleth/#:~:text=Custom%20Legend%20Control)   
