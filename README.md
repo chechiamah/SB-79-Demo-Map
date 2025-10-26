@@ -1,6 +1,6 @@
 # Citations
 
-Mapping transit sites and eligible surrounding zones, and adding more context with aspects like demographics, walkability, and zoning to better understand the latest in urban development. 
+Mapping transit sites and eligible surrounding zones, and adding more context with aspects like demographics, walkability, and zoning, to better understand the latest in urban development. 
 
 Eligible Stops, Zones, and LA County Boundary sources from that ArcGIS Online map from user [mcarter8\_USCSSI](https://www.arcgis.com/home/item.html?id=f892f5f486fa437c8dbd91a4933bd54c) and checked against the SB 79 proposal map as featured in the [StoryMap](https://www.arcgis.com/home/item.html?id=f892f5f486fa437c8dbd91a4933bd54c)
 
