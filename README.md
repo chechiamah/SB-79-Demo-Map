@@ -16,10 +16,11 @@ School Boundaries and Polygons: [LAUSD](https://www.arcgis.com/apps/View/index.h
 
 Walkability: [Los Angeles City Planning](https://www.arcgis.com/home/item.html?id=e96fc7d7eb1746cf87ceea7114c6aee9)
 
-Tools used: 
+Tools used:  
 Leaflet (see citation in code)  
-	search ⇒ Source: [https://github.com/stefanocudini/leaflet-search/blob/master/examples/simple.html](https://github.com/stefanocudini/leaflet-search/blob/master/examples/simple.html)  
-	Layer Control → [https://leafletjs.com/examples/choropleth/\#:\~:text=Custom%20Legend%20Control](https://leafletjs.com/examples/choropleth/#:~:text=Custom%20Legend%20Control)   
+search ⇒ Source: [https://github.com/stefanocudini/leaflet-search/blob/master/examples/simple.html](https://github.com/stefanocudini/leaflet-search/blob/master/examples/simple.html)  
+Layer Control → [https://leafletjs.com/examples/choropleth/\#:\~:text=Custom%20Legend%20Control](https://leafletjs.com/examples/choropleth/#:~:text=Custom%20Legend%20Control)     
+
 Visual Studio Code + + AI tools to support coding and research
 
 Layers: 
