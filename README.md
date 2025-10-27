@@ -1,5 +1,8 @@
 # Citations
 
+If these links do not work, please refer to this [doc](https://docs.google.com/document/d/1mT8GKRdYCxYk-sKbb-unwmHbf8GkB1BtOCvkYUBWhtY/edit?usp=sharing)  
+
+
 Mapping transit sites and eligible surrounding zones, and adding more context with aspects like demographics, walkability, and zoning, to better understand the latest in urban development. 
 
 Eligible Stops, Zones, and LA County Boundary sources from that ArcGIS Online map from user [mcarter8\_USCSSI](https://www.arcgis.com/home/item.html?id=f892f5f486fa437c8dbd91a4933bd54c) and checked against the SB 79 proposal map as featured in the [StoryMap](https://storymaps.arcgis.com/stories/480791d9b665485ea798986dcad61e86)
