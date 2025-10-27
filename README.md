@@ -21,7 +21,7 @@ Leaflet (see citation in code)
 search → Source: [https://github.com/stefanocudini/leaflet-search/blob/master/examples/simple.html](https://github.com/stefanocudini/leaflet-search/blob/master/examples/simple.html)  
 Layer Control → [https://leafletjs.com/examples/choropleth/\#:\~:text=Custom%20Legend%20Control](https://leafletjs.com/examples/choropleth/#:~:text=Custom%20Legend%20Control)     
 
-Visual Studio Code + AI tools to support coding and research
+Visual Studio Code + AI tools for assistance
 
 Layers: 
 ArcGIS REST Services Directory and OpenStreetMap
