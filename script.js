@@ -1,0 +1,904 @@
+var map = L.map('map', {
+    minZoom: 9, 
+    maxZoom: 18, 
+    zoomControl: true
+}).setView([34.052235, -118.243683], 10);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap', 
+    minZoom: 9, 
+    maxZoom: 18, 
+}).addTo(map);
+
+
+//SEARCH CONTROL
+var searchControl = L.Control.geocoder({
+    position: 'topright',
+    placeholder: 'Search addresses in LA County...',
+    errorMessage: 'Address not found.'
+}).addTo(map);
+
+function inLaCounty(latlng){
+    
+}
+
+searchControl.on('markgeocode', function(e) {
+    if (window.searchMarker) {
+        map.removeLayer(window.searchMarker);
+    }
+        window.searchMarker = L.marker(e.geocode.center)
+            .addTo(map)
+            .bindPopup('<b>' + e.geocode.name + '</b>')
+            .openPopup();
+
+        map.setView(e.geocode.center, 15);
+    });
+
+//LA COUNTY BOUNDARY ----------------------------------
+var featureLayer = L.esri.featureLayer({
+    url: 'https://services1.arcgis.com/ZIL9uO234SBBPGL7/arcgis/rest/services/SB79_WFL1/FeatureServer/2',
+    where: "NAME = 'Los Angeles'",
+    style: function(feature){
+        return{
+            color: '#3388ff',
+            weight: 2, 
+            opacity: 0.7,
+            fillColor:'#3388ff',
+            fillOpacity: 0 
+        }
+    },
+    interactive: false
+}).addTo(map);
+
+//MAP LAYERS----------------------------------------------
+
+//Housing Density
+var housingDensity = L.tileLayer('https://tiles.arcgis.com/tiles/nGt4QxSblgDfeJn9/arcgis/rest/services/Los_Angeles_Housing_Density/MapServer/tile/{z}/{y}/{x}',{
+    opacity: 0.7,
+    style: function(feature) {
+        var density= feature.properties.density;
+        var color;
+
+        //Switch Cases for Tiers
+        switch(tz){
+            case 'High': color = '#ff1212'; break; 
+            case 'Medium': color = '#a62727'; break; 
+            case 'Low': color = '#6c0707'; break; 
+            default: color = '#3388ff'; 
+        }
+        return{
+            color: color,
+            weight: 1, 
+            opacity: 0.8,
+            fillColor: color,
+            fillOpacity: 0.25      
+        }
+    }, 
+    interactive:false
+})//.addTo(map);
+
+//Census Tract by Race
+var censusRace = L.esri.featureLayer({
+    url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/ACS_Population_by_Race_and_Hispanic_Origin_Boundaries/FeatureServer/2',
+    where: "County = 'Los Angeles County'",
+   style: function(feature) {
+        var props = feature.properties;
+        
+        //CENSUS COLUMNS
+        var races = {
+            'White': props.B03002_003E,
+            'Hispanic/Latino': props.B03002_012E,
+            'Black': props.B03002_004E,
+            'Asian': props.B03002_006E,
+            'Native American': props.B03002_005E,
+            'Pacific Islander': props.B03002_007E,
+            'Other Race': props.B03002_008E,
+            'Two or More Races': props.B03002_009E
+        };
+        
+        var maxRace = '';
+        var maxCount = 0;
+        
+        for (var race in races) {
+            if (races[race] > maxCount) {
+                maxCount = races[race];
+                maxRace = race;
+            }
+        }
+        
+        //LEGEND FOR DEMO
+        var color;
+        switch(maxRace) {
+
+            //WHITE
+            case 'White':
+            color = '#b9a087';
+            break;
+
+            //HISPANIC / LATINO
+            case 'Hispanic/Latino':
+            color = '#78aea0'; 
+            break;
+
+            //BLACK
+            case 'Black':
+            color = '#d9bf0d';
+            break;
+
+            //ASIAN
+            case 'Asian':
+            color = '#ab579d'; 
+            break;
+
+            //NATIVE AMERICAN
+            case 'Native American':
+            color = '#1e8553'; 
+            break;
+
+            //PACIFIC ISLANDER
+            case 'Pacific Islander':
+            color = '#6a28c7';
+            break;
+
+            //OTHER
+            case 'Other Race':
+            color = '#00b6f1'; 
+            break;
+
+            //MIXED RACE
+            case 'Two or More Races':
+            color = '#c44245'; 
+            break;
+
+            default:
+            color = '#cccccc'; 
+        }
+        
+        return {
+            color: '#000000',
+            weight: 0.5,
+            opacity: 0.8,
+            fillColor: color,
+            fillOpacity: 0.7
+        };
+    },
+    interactive: false
+}); 
+
+var zoning = L.esri.featureLayer({
+    url: 'https://services5.arcgis.com/7nsPwEMP38bSkCjy/arcgis/rest/services/Zoning/FeatureServer/15',
+    style: function(feature) {
+        var category = feature.properties.CATEGORY;
+        var color;
+        switch(category){
+            //AGRICULTURE
+            case 'Agricultural': 
+            color = '#c2ffc2'; 
+            break;
+            
+            //COMMERCIAL
+            case 'Commercial': 
+            color = '#f57a7a'; 
+            break;
+
+            //MANUFACTURING
+            case 'Manufacturing': 
+            color = '#80cceb'; 
+            break;
+
+            //MANUFACTURING
+            case 'Manufacturing': 
+            color = '#80cceb'; 
+            break;
+
+            //MULTIPLE FAMILY RESIDENTIAL
+            case 'Multiple Family Residential': 
+            color = '#ffc200'; 
+            break;
+
+            //OPEN SPACE
+            case 'Open Space': 
+            color = '#a5f57a'; 
+            break;
+
+            //PARKING
+            case 'Parking': 
+            color = '#e0e0e0'; 
+            break;
+
+            //PUBLIC FACILITIES
+            case 'Public Facilities': 
+            color = '#89cd66'; 
+            break;
+
+            //SINGLE FAMILY RESIDENTIAL
+            case 'Single Family Residential': 
+            color = '#ffffbf'; 
+            break;
+
+            //SUBURBAN
+            case 'Suburban': 
+            color = '#c2ffc2'; 
+            break;
+
+            //COMMERCIAL-MIXED
+            case 'Commercial-Mixed': 
+            color = '#e64900'; 
+            break;
+
+            //FREEWAY
+            case 'Freeway': 
+            color = '#bdbdc5'; 
+            break;
+
+            //HYBRID INDUSTRIAL
+            case 'Hybrid Industrial': 
+            color = '#6e4487'; 
+            break;
+
+            //INDUSTRIAL
+            case 'Industrial': 
+            color = '#003882'; 
+            break;
+
+            //INDUSTRIAL MIXED
+            case 'Industrial-Mixed': 
+            color = '#6e4487'; 
+            break;
+
+            //PUBLIC
+            case 'Public': 
+            color = '#448970'; 
+            break;
+
+            //RESIDENTIAL MULTIPLE FAMILY
+            case 'Residential Multiple Family': 
+            color = '#e69800'; 
+            break;
+
+            //RESIDENTIAL MIXED
+            case 'Residential-Mixed': 
+            color = '#a66f00'; 
+            break;
+
+            default: color = '#cccccc';
+    }
+        return{
+            color: '#000000',
+            weight: 1, 
+            opacity: 0.8,
+            fillColor: color,
+            fillOpacity: 0.6      
+        }
+
+    }, 
+    interactive: true
+})
+zoning.bindPopup(function(layer) {
+    var props = layer.feature.properties;
+    var popupContent = '<div style="max-height: 300px; overflow-y: auto; min-width: 250px;">';
+    
+    popupContent += '<h4> Zoning Info</h4>';
+    popupContent += '<hr style="margin: 8px 0;">';
+    
+    if (props.Zoning) {
+        popupContent += '<strong>Zoning Code:</strong> ' + props.Zoning + '<br>';
+    }
+
+    if (props.CATEGORY) {
+        popupContent += '<strong>Category:</strong> ' + props.CATEGORY + '<br>';
+    }
+    popupContent += '</div>';
+    return popupContent;
+});
+//WALKABILITY
+var walkabilityIndex =  L.esri.featureLayer({
+    url: 'https://services5.arcgis.com/7nsPwEMP38bSkCjy/arcgis/rest/services/Walkability_Index/FeatureServer/100',
+    style: function(feature) {
+        var walkability = feature.properties.Walkability;
+        var color;
+        
+        //GRADUATED COLORS Walkability
+        if (walkability <= -2 ){ 
+            color = '#ffffe0'; 
+        } else if (walkability > -2 && walkability <= 0){ 
+            color = '#b1dfdb'; 
+        } else if (walkability > 0 && walkability <= 3){ 
+            color = '#85b7ce'; 
+        } else if (walkability > 3 && walkability <= 6){ 
+            color = '#618fbf'; 
+        } else if (walkability > 6 && walkability <= 9){ 
+            color = '#3e67ae'; 
+        } else if (walkability > 9){ 
+            color = '#00429d'; 
+        } else {
+            color = '#cccccc'
+        }
+
+        return{
+            color: '#000000',
+            weight: 0.5, 
+            opacity: 0.8,
+            fillColor: color,
+            fillOpacity: 0.7
+    }
+}, interactive: true
+});
+
+walkabilityIndex.bindPopup(function(layer) {
+    var props = layer.feature.properties;
+    var popupContent = '<div style="max-height: 300px; overflow-y: auto; min-width: 250px;">';
+                
+    popupContent += '<h4>Walkability Index </h4>';
+    popupContent += '<hr style="margin: 8px 0;">';
+                
+    if (props.Walkability != null && props.Walkability !== undefined) {
+                popupContent += '<strong>Walkability Score:</strong> ' + props.Walkability + '<br>';
+                var interpretation = '';
+                if (props.Walkability <= -2) interpretation = 'Very Low Walkability';
+                else if (props.Walkability > -2 && props.Walkability <= 0) interpretation = 'Low Walkability';
+                else if (props.Walkability > 0 && props.Walkability <= 3) interpretation = 'Moderate Walkability';
+                else if (props.Walkability > 3 && props.Walkability <= 6) interpretation = 'High Walkability';
+                else if (props.Walkability > 6 && props.Walkability <= 9) interpretation = 'Very High Walkability';
+                else if (props.Walkability > 9) interpretation = 'Excellent Walkability';
+                else interpretation = 'No Data';
+
+                popupContent += '<strong>Interpretation:</strong> ' + interpretation + '<br>';
+                
+    }
+        popupContent += '</div>';
+        return popupContent;
+    });
+    //MEDIAN HH INCOME
+    var medianIncome = L.geoJSON(null, {
+        style: function(feature){
+            var income = feature.properties.Med_HH_Incm;
+            var color; 
+
+            //GRADUATED COLORS for Med HH Income
+            if (income < 56118){ 
+                color = '#d3f0da'; 
+            } else if (income >= 56118 && income < 86850){ 
+                color = '#a0bba6'; 
+            } else if (income >= 86850 && income < 121500){ 
+                color = '#6f8976'; 
+            } else if (income >= 121500 && income < 174667){ 
+                color = '#425a48'; 
+            } else if (income >= 174667){ 
+                color = '#182f1f'; 
+            } else {
+                color = '#ffffff'
+            }
+
+            return{
+                color: '#000000',
+                weight: 0.5, 
+                opacity: 0.8,
+                fillColor: color,
+                fillOpacity: 0.7
+        }
+    },
+    onEachFeature: function(feature, layer){
+        layer.bindPopup(function() {
+                var props = feature.properties;
+                var popupContent = '<div style="max-height: 300px; overflow-y: auto; min-width: 200px;">';
+                
+                popupContent += '<h4>Median Household Income</h4>';
+                popupContent += '<hr style="margin: 8px 0;">';
+                
+                if (props.Med_HH_Incm) {
+                    var formattedIncome = '$' + props.Med_HH_Incm.toLocaleString();
+                    popupContent += '<strong>Median HH Income:</strong> ' + formattedIncome + '<br>';
+                }
+                popupContent += '</div>';
+                return popupContent;
+        });
+    }
+    });
+
+    //ADD MEDIAN HH INCOME GEOJSON
+        fetch('dataLayers/MedianHHIncome.geojson')
+        .then(response => response.json())
+        .then(data => {
+            medianIncome.addData(data);
+            console.log('Median HH Income data loaded successfully');
+        })
+        .catch(error => {
+            console.error('Error loading MedianHHIncome.geojson:', error);
+        });
+
+    //LAUSD------------------
+var schoolsPoly = L.geoJSON(null, {
+        pointToLayer: function(feature, latlng) {
+        return L.circleMarker(latlng, {
+            radius: 6, 
+            fillColor: getSchoolColor(feature.properties.MAP_TYPE),
+            color: '#000000', 
+            weight: 1, 
+            opacity: 0.8,
+            fillOpacity: 0.8
+        });
+        },
+        style: function(feature) {
+            return{
+                fillColor:  getSchoolColor(feature.properties.MAP_TYPE),
+                color: '#000000',
+                weight: 1,
+                opacity: 0.8,
+                fillOpacity: 0.6
+        }
+    },
+    onEachFeature: function(feature, layer){
+    layer.bindPopup('<div style="min-width: 150px;"><strong>' + 
+            (feature.properties.MPD_NAME || 'Unnamed School') + '</strong></div>');
+    }
+    });
+
+    //  COLOR CODE SCHOOLS
+    function getSchoolColor(mapType){
+        switch(mapType){
+            case 'ES':
+                return '#ff0000'; 
+            case 'MS':
+                return '#0000ff'; 
+            case 'HS':
+                return '#00ff00'; 
+            default:
+                return '#95a5a6'; 
+        }
+    }
+    fetch('dataLayers/schoolPoly.geojson')  
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            schoolsPoly.addData(data);  
+            console.log('schoolPoly data loaded successfully');
+        })
+        .catch(error => {
+            console.error('Error loading schoolPoly.geojson:', error);
+         });
+
+    //ELEMENTARY SCHOOLS
+    var lausdElementarySchools = L.geoJSON(null, {
+        style: function(feature) {
+            return{
+                color: '#ff0000',
+                weight: 2.5,
+                opacity: 0.8,
+                fillColor: '#ff0000',
+                fillOpacity: 0
+        }
+    }
+});
+    //ADD ES GEOJSON
+        fetch('dataLayers/LAUSD_ES.geojson')
+        .then(response => response.json())
+        .then(data => {
+            lausdElementarySchools.addData(data);
+            console.log('ES data loaded successfully');
+        })
+        .catch(error => {
+            console.error('Error loading LAUSD_ES.geojson:', error);
+});
+
+    //MIDDLE SCHOOLS
+    var lausdMiddleSchools = L.geoJSON(null, {
+        style: function(feature) {
+            return{
+                color: '#0000ff',
+                weight: 2.5,
+                opacity: 0.8,
+                fillColor: '#0000ff',
+                fillOpacity: 0
+        }
+    }
+});
+    //ADD MS GEOJSON
+        fetch('dataLayers/LAUSD_MS.geojson')
+        .then(response => response.json())
+        .then(data => {
+            lausdMiddleSchools.addData(data);
+            console.log('MS data loaded successfully');
+        })
+        .catch(error => {
+            console.error('Error loading LAUSD_MS.geojson:', error);
+});
+
+    //HIGH SCHOOLS
+    var lausdHighSchools = L.geoJSON(null, {
+        style: function(feature) {
+            return{
+                color: '#00ff00',
+                weight: 2.5,
+                opacity: 0.8,
+                fillColor: '#00ff00',
+                fillOpacity: 0
+        }
+    }
+});
+    //ADD HS GEOJSON
+        fetch('dataLayers/LAUSD_HS.geojson')
+        .then(response => response.json())
+        .then(data => {
+            lausdHighSchools.addData(data);
+            console.log('HS data loaded successfully');
+        })
+        .catch(error => {
+            console.error('Error loading LAUSD_HS.geojson:', error);
+});
+    //TRANSIT ZONES
+    var transitZones =  L.esri.featureLayer({
+        url: 'https://services1.arcgis.com/ZIL9uO234SBBPGL7/arcgis/rest/services/SB79_WFL1/FeatureServer/8',
+        style: function(feature) {
+            var tz = feature.properties.TZ;
+            var color;
+
+            //Switch Cases for Tiers
+            switch(tz){
+                case 'T1Z1': color = '#69b5e0'; break; 
+                case 'T1Z2': color = '#2121bf'; break; 
+                case 'T2Z1': color = '#e37d93'; break; 
+                case 'T2Z2': color = '#ab1636'; break;
+                default: color = '#3388ff'; 
+            }
+            return{
+                color: color,
+                weight: 1, 
+                opacity: 0.8,
+                fillColor: color,
+                fillOpacity: 0.25      
+            }
+        }, 
+        interactive:false
+    })//.addTo(map);
+
+    //LA AND SB COUNTY STOPS
+    var transitStops = L.esri.featureLayer({
+        url: 'https://services1.arcgis.com/ZIL9uO234SBBPGL7/arcgis/rest/services/SB79_WFL1/FeatureServer/0',
+        where: "agency_primary IN ('Los Angeles County Metropolitan Transportation Authority', 'San Bernardino County Transportation Authority')",
+        style: function(feature) {
+            var serviceType = feature.properties.ServiceType;
+            var color;
+            // SERVICE BY COLOR 
+            switch(serviceType) {
+                case 1: // Heavy rail
+                    color = '#26421d';
+                    break;
+                case 2: // Very high frequency commuter rail
+                    color = '#1d2342';
+                    break;
+                case 3: // High frequency commuter rail
+                    color = '#4257c9';
+                    break;
+                case 4: // Light rail
+                    color = '#d1812c';
+                    break;
+                case 5: // Bus rapid transit
+                    color = '#a8192a';
+                    break;
+                case 8: // Frequent commuter rail
+                    color = '#bed8e8';
+                    break;
+                case 9: // Interstate/intercity passenger rail
+                    color = '#8b8d8f';
+                    break;
+                default:
+                    color = '#3388ff';
+            }
+            
+            return {
+                color: '#000000',
+                weight: 2,
+                opacity: 0.8,
+                fillColor: color,
+                fillOpacity: 1,
+                radius: 6
+            };
+        },
+        pointToLayer: function(feature, latlng) {
+            return L.circleMarker(latlng);
+        }
+    })//.addTo(map);
+
+    //POPUPS ----------------------------------
+    // TRANSIT STOPS
+    transitStops.bindPopup(function(layer) {
+        var props = layer.feature.properties;
+        var popupContent = '<div style="max-height: 300px; overflow-y: auto; min-width: 250px;">';
+        
+        popupContent += '<h4>' + (props.stop_name || 'Unnamed Stop') + '</h4>';
+        popupContent += '<hr style="margin: 8px 0;">';
+        
+        if (props.agency_primary) {
+            popupContent += '<strong>Agency:</strong> ' + props.agency_primary + '<br>';
+        }
+        if (props.ServiceType) {
+            var serviceTypeLabels = {
+                1: 'Heavy rail',
+                2: 'Very high frequency commuter rail', 
+                3: 'High frequency commuter rail',
+                4: 'Light rail',
+                5: 'Bus rapid transit',
+                8: 'Frequent commuter rail',
+                9: 'Interstate/intercity passenger rail'
+            };
+            popupContent += '<strong>Service Type:</strong> ' + (serviceTypeLabels[props.ServiceType] || props.ServiceType) + '<br>';
+        }
+        if (props.stop_id) {
+            popupContent += '<strong>Stop ID:</strong> ' + props.stop_id + '<br>';
+        }
+        if (props.n_arrivals) {
+            popupContent += '<strong>Daily Arrivals:</strong> ' + props.n_arrivals + '<br>';
+        }
+        if (props.n_routes) {
+            popupContent += '<strong>Number of Routes:</strong> ' + props.n_routes + '<br>';
+        }
+        if (props.route_ids_served) {
+            popupContent += '<strong>Routes Served:</strong> ' + props.route_ids_served + '<br>';
+        }
+        if (props.Tier) {
+            var tierLabels = {
+                1: 'Tier 1',
+                2: 'Tier 2', 
+                3: 'Tier 3',
+                4: 'Ineligible - Not in a city with population > 35,000',
+                5: 'Other transit stops'
+            };
+            //popupContent += '<strong>Tier:</strong> ' + (tierLabels[props.Tier] || props.Tier) + '<br>';
+        }
+        
+        popupContent += '</div>';
+        return popupContent;
+    });
+
+    // BASE MAP
+    var baseLayers = {
+        "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        })
+    };
+
+    var overlayLayers = { 
+        "Transit Stops (LA & San Bernardino County)": transitStops,
+        "Transit Zones": transitZones,
+        "Housing Density": housingDensity,
+        "Census Tracts by Race": censusRace,
+        "Zoning": zoning,
+        "Median Household Income": medianIncome,
+        "Walkability Index": walkabilityIndex,
+        "Elementary School Boundaries": lausdElementarySchools,
+        "Middle School Boundaries": lausdMiddleSchools,
+        "High School Boundaries": lausdHighSchools,
+        "School Polygons": schoolsPoly
+    };
+
+    // LAYER CONTROL (https://leafletjs.com/examples/choropleth/#:~:text=Custom%20Legend%20Control)
+    L.control.layers(baseLayers, overlayLayers, {
+        collapsed: true,
+        position: 'topright'
+    }).addTo(map);
+
+    var legend = L.control({position: 'bottomleft'}); 
+
+    legend.onAdd = function (map) {
+        var div = L.DomUtil.create('div', 'legend-control');
+        div.innerHTML = '';
+        return div;
+};
+    legend.addTo(map);
+    
+    //TRANSIT STOPS
+    function getTransitStopsLegend() {
+        var stops = [
+            {color: '#26421d', label: 'Heavy Rail'},
+            {color: '#1d2342', label: 'Very High Freq Commuter Rail'},
+            {color: '#4257c9', label: 'High Freq Commuter Rail'},
+            {color: '#d1812c', label: 'Light Rail'},
+            {color: '#a8192a', label: 'Bus Rapid Transit'},
+            {color: '#bed8e8', label: 'Frequent Commuter Rail'},
+            {color: '#8b8d8f', label: 'Interstate Rail'}
+        ];
+        
+        var legendContent = '<h4>Transit Stops</h4>';
+        for (var i = 0; i < stops.length; i++) {
+            legendContent +=
+                '<i style="background:' + stops[i].color + '"></i> ' +
+                stops[i].label + '<br>';
+        }
+        return legendContent;
+    }
+
+    //TRANSIT ZONES
+    function getTransitZonesLegend() {
+        var zones = [
+            {color: '#69b5e0', label: 'Tier 1 Zone 1 (within 1/4 miles)'},
+            {color: '#2121bf', label: 'Tier 1 Zone 2 (within 1/4 and 1/2 miles)'},
+            {color: '#e37d93', label: 'Tier 2 Zone 1 (within 1/4 miles)'},
+            {color: '#ab1636', label: 'Tier 2 Zone 2 (within 1/4 and 1/2 miles)'}
+        ];
+        
+        var legendContent = '<h4>Transit Zones</h4>';
+        for (var i = 0; i < zones.length; i++) {
+            legendContent +=
+                '<i style="background:' + zones[i].color + '"></i> ' +
+                zones[i].label + '<br>';
+        }
+        return legendContent;
+    }
+
+    //HOUSING DENSITY
+    function getDensityLegend() {
+        var density = [
+            {color: '#ff1212', label: 'High'},
+            {color: '#a62727', label: 'Medium'},
+            {color: '#6c0707', label: 'Low'}
+        ];
+        
+        var legendContent = '<h4>Housing Density Levels</h4>';
+        for (var i = 0; i < density.length; i++) {
+            legendContent +=
+                '<i style="background:' + density[i].color + '"></i> ' +
+                density[i].label + '<br>';
+        }
+        return legendContent;
+    }
+    //RACIAL DEMO
+     function getDemoLegend() {
+        var race = [
+            {color: '#b9a087', label: 'White'},
+            {color: '#78aea0', label: 'Hispanic/Latino'},
+            {color: '#d9bf0d', label: 'Black'},
+            {color: '#ab579d', label: 'Asian'},
+            {color: '#1e8553', label: 'Native American'},
+            {color: '#6a28c7', label: 'Pacific Islander'},
+            {color: '#00b6f1', label: 'Other Race'},
+            {color: '#c44245', label: 'Two or More Races'}
+        ];
+        
+        var legendContent = '<h4>Race/Ethnicity (Majority)</h4>';
+        for (var i = 0; i < race.length; i++) {
+            legendContent +=
+                '<i style="background:' + race[i].color + '"></i> ' +
+                race[i].label + '<br>';
+        }
+        return legendContent;
+    }
+    // ZONING
+    function getZoningLegend() {
+        var zoning = [
+            {color: '#c2ffc2', label: 'Agricultural/Suburban'},
+            {color: '#f57a7a', label: 'Commercial'},
+            {color: '#80cceb', label: 'Manufacturing'},
+            {color: '#ffc200', label: 'Multiple Family Residential'},
+            {color: '#a5f57a', label: 'Open Space'},
+            {color: '#e0e0e0', label: 'Parking'},
+            {color: '#89cd66', label: 'Public Facilities'},
+            {color: '#ffffbf', label: 'Single Family Residential'},
+            {color: '#e64900', label: 'Commercial-Mixed'},
+            {color: '#bdbdc5', label: 'Freeway'},
+            {color: '#6e4487', label: 'Hybrid/Industrial Mixed'},
+            {color: '#003882', label: 'Industrial'},
+            {color: '#448970', label: 'Public'},
+            {color: '#e69800', label: 'Residential Multiple Family'},
+            {color: '#a66f00', label: 'Residential-Mixed'}
+        ];
+        
+        var legendContent = '<h4>Zoning Types</h4>';
+        for (var i = 0; i < zoning.length; i++) {
+            legendContent +=
+                '<i style="background:' + zoning[i].color + '"></i> ' +
+                zoning[i].label + '<br>';
+        }
+        return legendContent;
+    }
+    //MED HH INCOME
+    function getIncomeLegend() {
+        var income = [
+            {color: '#d3f0da', label: '< $56,118'},
+            {color: '#a0bba6', label: '$56,118 - $86,850'},
+            {color: '#6f8976', label: '$86,850 - $121,500'},
+            {color: '#425a48', label: '$121,500 - $174,667'},
+            {color: '#182f1f', label: '≥ $174,667'}
+        ];
+        
+        var legendContent = '<h4>Median Household Income</h4>';
+        for (var i = 0; i < income.length; i++) {
+            legendContent +=
+                '<i style="background:' + income[i].color + '"></i> ' +
+                income[i].label + '<br>';
+        }
+        return legendContent;
+    }
+    //WALKABILITY
+    function getWalkabilityLegend() {
+        var walk = [
+            {color: '#ffffe0', label: 'Very Low (≤ -2)'},
+            {color: '#b1dfdb', label: 'Low (-2 to 0)'},
+            {color: '#85b7ce', label: 'Moderate (0 to 3)'},
+            {color: '#618fbf', label: 'High (3 to 6)'},
+            {color: '#3e67ae', label: 'Very High (6 to 9)'},
+            {color: '#00429d', label: 'Excellent (> 9)'}
+        ];
+        
+        var legendContent = '<h4>Walkability Index</h4>';
+        for (var i = 0; i < walk.length; i++) {
+            legendContent +=
+                '<i style="background:' + walk[i].color + '"></i> ' +
+                walk[i].label + '<br>';
+        }
+        return legendContent;
+    }
+    //SCHOOL BOUNDARIES
+    function getSchoolBoundariesLegend() {
+        var schoolLine = [
+            {color: '#ff0000', label: 'Elementary Schools'},
+            {color: '#0000ff', label: 'Middle Schools'},
+            {color: '#00ff00', label: 'High Schools'}
+        ];
+        
+        var legendContent = '<h4>School Boundaries</h4>';
+        for (var i = 0; i < schoolLine.length; i++) {
+            legendContent +=
+                '<i style="background:' + schoolLine[i].color + '"></i> ' +
+                schoolLine[i].label + '<br>';
+        }
+        return legendContent;
+    }
+    //SCHOOL POLYGONS
+    function getSchoolPolygonsLegend() {
+        var polys = [
+            {color: '#ff0000', label: 'Elementary (ES)'},
+            {color: '#0000ff', label: 'Middle (MS)'},
+            {color: '#00ff00', label: 'High (HS)'},
+            {color: '#c8c8c8', label: 'Others'}
+        ];
+        
+        var legendContent = '<h4>School Types</h4>';
+        for (var i = 0; i < polys.length; i++) {
+            legendContent +=
+                '<i style="background:' + polys[i].color + '"></i> ' +
+                polys[i].label + '<br>';
+        }
+        return legendContent;
+    }
+    function updateLegend() {
+        var legendDiv = legend.getContainer();
+        legendDiv.innerHTML = '';
+        
+        // Add legend for each active layer
+        if (map.hasLayer(censusRace)) {
+            legendDiv.innerHTML += getDemoLegend();
+        }
+        if (map.hasLayer(zoning)) {
+            legendDiv.innerHTML += getZoningLegend();
+        }
+        if (map.hasLayer(walkabilityIndex)) {
+            legendDiv.innerHTML += getWalkabilityLegend();
+        }
+        if (map.hasLayer(housingDensity)) {
+            legendDiv.innerHTML += getDensityLegend();
+        }
+        if (map.hasLayer(medianIncome)) {
+            legendDiv.innerHTML += getIncomeLegend();
+        }
+        if (map.hasLayer(transitZones)) {
+            legendDiv.innerHTML += getTransitZonesLegend();
+        }
+        if (map.hasLayer(transitStops)) {
+            legendDiv.innerHTML += getTransitStopsLegend();
+        }
+        if (map.hasLayer(lausdElementarySchools) || map.hasLayer(lausdMiddleSchools) || map.hasLayer(lausdHighSchools)) {
+            legendDiv.innerHTML += getSchoolBoundariesLegend();
+        }
+        if (map.hasLayer(schoolsPoly)) {
+            legendDiv.innerHTML += getSchoolPolygonsLegend();
+        }
+    }
+
+    //EVENT LISTERS
+    map.on('overlayadd', updateLegend);
+    map.on('overlayremove', updateLegend);
